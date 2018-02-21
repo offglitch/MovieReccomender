@@ -27,8 +27,42 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 	 * @param movieId id of the movie
 	 * @param newRating new rating of this movie
 	 */
-	public void setRating(int movieId, double newRating) {
-		// FILL IN CODE
+	public void setRating(int movieId, double newRating)
+	{
+			// check if the movie id exists
+			if( getRating(movieId) != -1)
+			{
+				// iterate the list and update this rating
+				// the reference to the head of this list
+
+				MovieRatingNode current = head;
+
+				// we iterate this as long as the movieId node is not found
+				while( current != null )
+				{
+					// check for the match of the movie id
+					if( current.getMovieId() == movieId )
+					{
+						// if matches, update the rating and return
+						current.setMovieRating(newRating);
+
+						// maintain sorted order
+						// add a method for this
+
+						// return
+						return;
+					}
+
+					// move to the next movie
+					current = current.next();
+				}
+			}
+			else
+			{
+				// add a new movie node with this rating
+				// also, a sorted order is to be maintained
+				insertByRating(movieId, newRating);
+			}
 
 	}
 
@@ -38,10 +72,27 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      * @param movieId movie id
      * @return rating of a movie with this movie id
      */
-	public double getRating(int movieId) {
-		// FILL IN CODE
-		return -1; // don't forget to change it
+	public double getRating(int movieId)
+	{
+		// the reference to the head of this list
+		MovieRatingNode current = head;
 
+		// iterate as long as current is not null
+		while( current != null )
+		{
+			// check for the match of the movie id
+			if( current.getMovieId() == movieId )
+			{
+				// if matches, return the rating for this
+				return current.getMovieRating();
+			}
+
+			// move to the next movie
+			current = current.next();
+		}
+
+		// -1 is returned if the movie id does not exist in the list
+		return -1;
 	}
 
 
@@ -54,10 +105,74 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      * @param movieId id of the movie
      * @param rating rating of the movie
      */
-	public void insertByRating(int movieId, double rating) {
-		// FILL IN CODE. Make sure to test this method thoroughly
+	public void insertByRating(int movieId, double rating)
+	{
+		// if the head is null, create a new head
+		if( head == null )
+		{
+			// create a new head
+			head = new MovieRatingNode(movieId, rating);
 
+			// return
+			return;
+		}
 
+		// if this rating is greater than the rating at head, we insert it before head
+		else if( rating > head.getMovieRating() )
+		{
+			// create new node
+			MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
+
+			// add it before the head
+			newNode.setNext(head);
+
+			// now, head is made to point to this new node, so that this becomes new head
+			head = newNode;
+		}
+		// else insert it at the right position
+		else
+		{
+			// we use current and previous pointers
+			// current points to current node, and current node starts from the second node in the list
+			// previous points to the node before the current node
+			MovieRatingNode current = head.next();
+			MovieRatingNode prev = head;
+
+			// we iterate this as long as the rating of this movie is smaller than rating of current movie
+			while( current != null )
+			{
+				// if node found where the rating of this movie is greater, insert
+				if( movieId>current.getMovieId() )
+				{
+					// create a new movie node
+					MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
+
+					// this new node is inserted between prev and current
+					// so previously, : ..-> prev->current->...
+					// after inserting this, it will be : ...prev->newnode->current->...
+
+					// set the next of the new node is current
+					newNode.setNext(current);
+
+					// now, next of prev is new node
+					prev.setNext(newNode);
+
+					// return
+					return;
+				}
+
+				// move to the next movie
+				prev = current;
+				current = current.next();
+			}
+
+			// if reached here, means this move rating was smaller than all the ratings in the list
+			// so we add this new rating to end of this list
+			MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
+
+			// since prev now is pointing to the last of the node in the list, we make next of prev point to this node
+			prev.setNext(newNode);
+		}
 	}
 
     /**
@@ -85,17 +200,56 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      * @return sublist of the MovieRatingsList that contains only nodes with
      * rating in the given interval
      */
-	public MovieRatingsList sublist(int begRating, int endRating) {
+	public MovieRatingsList sublist(int begRating, int endRating)
+	{
+		// the new list to be returned
 		MovieRatingsList res = new MovieRatingsList();
 
-		// FILL IN CODE
+		// the reference to the head node of this list
+		MovieRatingNode current = head;
+
+		// add all ratings to be this list which fall in the given range
+
+		// traverse as long as current is not null
+		while( current != null )
+		{
+			// check if the current rating is between the given range
+			if( current.getMovieRating() >= begRating && current.getMovieRating() <= endRating )
+			{
+				// add this rating to the new list
+				res.insertByRating( current.getMovieId(), current.getMovieRating() );
+			}
+
+			// move to the next
+			current = current.next();
+		}
+
+		// return the resulting list
 		return res;
 	}
 
+
 	/** Traverses the list and prints the ratings list in the following format:
 	 *  movieId:rating; movieId:rating; movieId:rating;  */
-	public void print() {
-		// FILL IN CODE
+	public void print()
+	{
+		// the reference to the head node of this list
+		MovieRatingNode current = head;
+
+		// add all ratings to be printed
+
+		// traverse as long as current is not null
+		while( current != null )
+		{
+			// print this node
+			System.out.print(current.getMovieId() + ":" + current.getMovieRating() + "; ");
+
+			// move to the next
+			current = current.next();
+		}
+
+		// change line
+		System.out.println();
 	}
 
 	/**
@@ -118,10 +272,17 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      *
      * @return rating stored in the node in the middle of the list
      */
-	public double getMedianRating() {
-		// FILL IN CODE
+	public double getMedianRating()
+	{
+		// if the middle node is not null, return its value
+		if( getMiddleNode() != null )
+		{
+			// returning the value of the middle node
+			return getMiddleNode().getMovieRating();
+		}
 
-		return -1; // don't forget to change it
+		// if middle node is null, return -1
+		return -1;
 	}
 
     /**
@@ -132,10 +293,31 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      * @param n the maximum number of movies to return
      * @return MovieRatingsList containing movies rated as 5
      */
-	public MovieRatingsList getNBestRankedMovies(int n) {
-		// FILL IN CODE
+	public MovieRatingsList getNBestRankedMovies(int n)
+	{
+		// the new list to be returned
+		MovieRatingsList res = new MovieRatingsList();
 
-		return null; // don't forget to change
+		// the reference to the head node of this list
+		MovieRatingNode current = head;
+
+		// add the first n ratings from the head of the list
+
+		// traverse as long as current is not null, and n ratings are not added
+		while( current != null && n>0 )
+		{
+			// add this rating to the new list
+			res.insertByRating( current.getMovieId(), current.getMovieRating() );
+
+			// move to the next
+			current = current.next();
+
+			// decrement n
+			n--;
+		}
+
+		// return the resulting list
+		return res;
 	}
 
     /**
@@ -192,16 +374,25 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 		}
 
 		@Override
-		public boolean hasNext() {
-			// FILL IN CODE
-
-			return true; // don't forget to change
+		public boolean hasNext()
+		{
+			// we have a next node if the current is not null, since the value at current is the next value to be returned
+			return curr != null;
 		}
 
 		@Override
-		public MovieRatingNode next() {
-			// FILL IN CODE
-			return null; // don't forget to change
+		public MovieRatingNode next()
+		{
+			// we return the value at current node
+
+			// store the reference to the current node
+			MovieRatingNode returnValue = curr;
+
+			// move current to the next
+			curr = curr.next();
+
+			// return the value stored
+			return returnValue;
 		}
 
 	}
