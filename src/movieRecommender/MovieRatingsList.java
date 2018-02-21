@@ -11,6 +11,7 @@ package movieRecommender;
  * but all methods are required for the assignment.
  */
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 public class MovieRatingsList implements Iterable<MovieRatingNode> {
@@ -183,14 +184,72 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      * @param otherList another MovieRatingList
      * @return similarity computed using Pearson correlation
      */
-    public double computeSimilarity(MovieRatingsList otherList) {
+    public double computeSimilarity(MovieRatingsList otherList)
+	{
 		double similarity = 0;
-        // FILL IN CODE
+		// a hash map to store the otherList ratings
+		HashMap<Integer, Double> ratingsMap1 = new HashMap<>();
+		// put all the ratings from the other list into the hashmap
+		for(MovieRatingNode node : otherList){
+			ratingsMap1.put(node.getMovieId(), node.getMovieRating());
+		}
+		// hash map to store this movie list's ratings
+		HashMap<Integer, Double> ratingsMap2 = new HashMap<>();
+		// put all the ratings from the this list into the hashmap
+		for(MovieRatingNode node : this){
+			ratingsMap2.put(node.getMovieId(), node.getMovieRating());
+		}
+		// now, look if all the movies in the map1 are present in map2
+		for(Integer key: ratingsMap1.keySet()){
+			//If the key(movie) isn't present in the second list,
+			//Then remove this key from the hashmap1
+			if(!ratingsMap2.containsKey(key)){
+				ratingsMap1.remove(key);
+			}
+		}
+		// similarly, look if all the movies in map2 are present in map1
+		for(Integer key: ratingsMap2.keySet()){
+			//If the key isn't present in both the lists
+			//Then remove this key from the hashmap1
+			if(!ratingsMap1.containsKey(key)){
+				ratingsMap2.remove(key);
+			}
+		}
+		// at this point both the hash maps have equal number of keys i.e., they just have
+		// the common movies. Non-common movies are removed from both
+		// get the value of 'n'
+		int n = ratingsMap1.size();
+		//Summation x
+		double sx = 0;
+		//Summation y
+		double sy = 0;
+		//Summation xy
+		double sxy = 0;
+		//Summation x squared
+		double sx2 = 0;
+		//Summation y squared
+		double sy2 = 0;
+		// assuming x corresponds to map1 and y corresponds to map2
+		// for each key i.e., for each 'i'
+		for(Integer key: ratingsMap1.keySet()){
+			//Add x_i to summation x
+			sx += ratingsMap1.get(key);
+			//Add y_i to summation y
+			sy += ratingsMap2.get(key);
+			//Add x_i*y_i to summation of xy
+			sxy += ratingsMap1.get(key)*ratingsMap2.get(key);
+			//Add x_i*x_i to summation x squared
+			sx2 += ratingsMap1.get(key)*ratingsMap1.get(key);
+			//Add y_i*y_i to summation y squared
+			sy2 += ratingsMap2.get(key)*ratingsMap2.get(key);
+		}
+		double numerator = n*sxy - sx*sy;
+		double denominator = Math.sqrt(n*sx2-sx*sx)*Math.sqrt(n*sy2-sy*sy);
+		similarity = numerator/denominator;
 
+		return similarity;
 
-        return similarity;
-
-    }
+	}
     /**
      * Returns a sublist of this list where the rating values are in the range
      * from begRating to endRating, inclusive.
@@ -258,13 +317,36 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      * using slow & fast pointers (as described in class).
 	 *
 	 * @return the middle MovieRatingNode
+	 * The idea is that the middle node will move once for every two moves of the fast node
+	 * So by the time the fast node reaches the end of the list, the middle node will be in the middle
 	 */
-	public MovieRatingNode getMiddleNode() {
+	public MovieRatingNode getMiddleNode()
+	{
 
-		// FILL IN CODE
-		return null; // don't forget to change it
+		//Slow node
+		MovieRatingNode middleNode = head;
+		//Fast node
+		MovieRatingNode fastNode = head;
+		//For every two moves of the fastNode, move the middleNode once
+		//Counter to calculate the number of nodes passed by the fastNode
+		int nodeCount = 0;
+		//Until you reach the end of the list
+		while(fastNode != null)
+		{
+			//Move the fast node to point to the next
+			fastNode = fastNode.next();
+			//Increment the node count
+			nodeCount++;
+			//Check if the nodeCount is a multiple of 2
+			if(nodeCount%2 == 0)
+			{
+				//If yes, update the middleNode
+				middleNode = middleNode.next();
+			}
+		}
+
+		return middleNode; // don't forget to change it
 	}
-
     /**
      * Returns the median rating (the number that is halfway into the sorted
      * list). To compute it, find the middle node and return it's rating. If the
@@ -304,7 +386,7 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 		// add the first n ratings from the head of the list
 
 		// traverse as long as current is not null, and n ratings are not added
-		while( current != null && n>0 )
+		while( current != null && n > 0 )
 		{
 			// add this rating to the new list
 			res.insertByRating( current.getMovieId(), current.getMovieRating() );
@@ -330,13 +412,13 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      * @param n the maximum number of movies to return
      * @return MovieRatingsList containing movies rated as 1
      */
-	public MovieRatingsList getNWorstRankedMovies(int n) {
+	public MovieRatingsList getNWorstRankedMovies(int n)
+	{
 
-		// FILL IN CODE
-		return null; // don't forget to change
 	}
 
-    /**
+
+	/**
      * Return a new list that is the reverse of the original list. The returned
      * list is sorted from lowest ranked movies to the highest rated movies.
      * Use only one additional MovieRatingsList (the one you return) and constant amount
@@ -346,10 +428,24 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
      * @param h head of the MovieRatingList to reverse
      * @return reversed list
      */
-	public MovieRatingsList reverse(MovieRatingNode h) {
+	public MovieRatingsList reverse(MovieRatingNode h)
+	{
 		MovieRatingsList r = new MovieRatingsList();
-		// FILL IN CODE
 
+		MovieRatingNode temp;
+		//Slow pointer starts at null
+		MovieRatingNode slow = null;
+		//Fast pointer starts at the head
+		MovieRatingNode fast = h;
+		while (fast != null){
+			temp = fast.next();
+			fast.setNext(slow);
+			slow = fast;
+			fast = temp;
+		}
+		//Set the slow pointer to be the head of the new list
+		r.head = slow;
+		//Return the reversed list
 		return r;
 	}
 

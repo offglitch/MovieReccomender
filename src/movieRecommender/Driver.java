@@ -7,15 +7,22 @@ package movieRecommender;
 public class Driver {
     public static void main(String[] args) {
 
+        MovieRatingsList list =	new	MovieRatingsList();
+
+        list.getRating(1);
+        list.getRating(4);
+        list.getRating(8);
+        list.print();
+
         MovieRecommender recommender = new MovieRecommender();
 
         // movies.csv and ratings.csv should be in the project folder
-        recommender.loadData("movies.csv","ratings.csv");
-        System.out.println("Loaded movie data...");
+        //recommender.loadData("movies.csv","ratings.csv");
+        //System.out.println("Loaded movie data...");
 
-        recommender.findRecommendations(3, 15, "recommendations");
-        System.out.println();
-        recommender.findAntiRecommendations(3, 15, "antiRecommendations");
+        //recommender.findRecommendations(3, 15, "recommendations");
+        //System.out.println();
+        //recommender.findAntiRecommendations(3, 15, "antiRecommendations");
 
     }
 }

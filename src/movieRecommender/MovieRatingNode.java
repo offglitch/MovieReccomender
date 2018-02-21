@@ -30,7 +30,8 @@ public class MovieRatingNode {
      * Advance to the next node in the list.
      * @return next node
      */
-    public MovieRatingNode next() {
+    public MovieRatingNode next()
+    {
         return next;
     }
 
@@ -38,14 +39,16 @@ public class MovieRatingNode {
      **
      * @param anotherNode given MovieRatingNode
      */
-    public void setNext(MovieRatingNode anotherNode) {
+    public void setNext(MovieRatingNode anotherNode)
+    {
         this.next = anotherNode;
     }
 
     /** Return the id of the movie stored in this node
      * @return movieId
      */
-    public int getMovieId() {
+    public int getMovieId()
+    {
         return movieId;
     }
 
@@ -53,7 +56,8 @@ public class MovieRatingNode {
      * A getter for the movie rating
      * @return movie rating
      */
-    public double getMovieRating() {
+    public double getMovieRating()
+    {
         return movieRating;
     }
 
@@ -62,14 +66,16 @@ public class MovieRatingNode {
      *  Change the rating to newRating.
      * @param newRating new rating value for this movie
      */
-    public void setMovieRating(double newRating) {
+    public void setMovieRating(double newRating)
+    {
         movieRating = newRating;
     }
 
     /** Return a string with the movie id and rating
      * @return string that contains movie info
      */
-    public String toString() {
+    public String toString()
+    {
         return movieId + ", " + movieRating;
     }
 }
