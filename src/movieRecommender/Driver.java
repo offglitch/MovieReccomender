@@ -9,12 +9,10 @@ public class Driver {
 
         MovieRatingsList list =	new	MovieRatingsList();
 
-        list.getRating(1);
-        list.getRating(4);
-        list.getRating(8);
+        list.getMiddleNode();
         list.print();
 
-        MovieRecommender recommender = new MovieRecommender();
+        //MovieRecommender recommender = new MovieRecommender();
 
         // movies.csv and ratings.csv should be in the project folder
         //recommender.loadData("movies.csv","ratings.csv");

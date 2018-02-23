@@ -1,5 +1,8 @@
 package movieRecommender;
 
+import java.util.HashSet;
+import java.util.Iterator;
+
 /** UserNode. The class represents a node in the UsersList.
  *  Stores a userId, a list of ratings of type MovieRatingsList,
  *  and a reference to the "next" user in the list.
@@ -33,19 +36,22 @@ public class UserNode {
      * Setter for the next reference
      * @param anotherUserNode A user node
      */
-    public void setNext(UserNode anotherUserNode) {
+    public void setNext(UserNode anotherUserNode)
+    {
         this.nextUser = anotherUserNode;
     }
 
     /** Return a userId stored in this node */
-    public int getId() {
+    public int getId()
+    {
         return userId;
     }
 
     /** Print info contained in this node:
      *  userId and a list of ratings.
      *  Expected format: (userid) movieId:rating; movieId:rating; movieId:rating; */
-    public void print() {
+    public void print()
+    {
         System.out.print("(" + userId + ") ");
         movieRatings.print();
 
@@ -59,7 +65,8 @@ public class UserNode {
      * @param movieId id of the movie
      * @param rating  rating of the movie
      */
-    public void insert(int movieId, double rating) {
+    public void insert(int movieId, double rating)
+    {
         movieRatings.insertByRating(movieId, rating);
 
     }
@@ -71,10 +78,24 @@ public class UserNode {
      * @param n  the maximum number of movies to return
      * @return array containing movie ids of movies rated as 5 (by this user)
      */
-    public int[] getFavoriteMovies(int n) {
-        // FILL IN CODE
+    public int[] getFavoriteMovies(int n)
+    {
+        int[] FavList = new int[n];
+        int i = 0;
+        Iterator<MovieRatingNode> iter = this.movieRatings.iterator();
+        while (iter.hasNext() && i < n)
+        {
+            MovieRatingNode FL = iter.next();
+            int movieId = FL.getMovieId();
+            Double rating = FL.getMovieRating();
+            if (rating == 5)
+            {
+                FavList[i] = movieId;
+                i+=1;
+            }
+        }
 
-        return null; // don't forget to change
+        return FavList; // don't forget to change
     }
 
     /**
@@ -84,11 +105,27 @@ public class UserNode {
      * @param n the maximum number of movies to return
      * @return array of movie ids of movies rated as 1
      */
-    public int[] getLeastFavoriteMovies(int n) {
-        // FILL IN CODE
+    public int[] getLeastFavoriteMovies(int n)
+    {
 
-        return null; // don't forget to change
+        int[] FavList = new int[n];
+        int i = 0;
+        Iterator<MovieRatingNode> iter = this.movieRatings.iterator();
+        while (iter.hasNext() && i < n)
+        {
+            MovieRatingNode FL = iter.next();
+            int movieId = FL.getMovieId();
+            Double rating = FL.getMovieRating();
+            if (rating == 1)
+            {
+                FavList[i] = movieId;
+                i+=1;
+            }
+        }
+
+        return FavList;
     }
+
 
     /**
      * Computes the similarity of this user with the given "other" user using
@@ -102,4 +139,17 @@ public class UserNode {
         return movieRatings.computeSimilarity(otherUser.movieRatings);
     }
 
+    public HashSet<Integer> alreadyWatched() {
+        Iterator<MovieRatingNode> iter = movieRatings.iterator();
+        HashSet<Integer> Set = new HashSet<>();
+        while (iter.hasNext()) {
+            MovieRatingNode MR = iter.next();
+            Set.add(MR.getMovieId());
+        }
+        return Set;
+    }
+
 }
+
+
+

@@ -26,26 +26,18 @@ public class UsersList {
     public void insert(int userId, int movieId, double rating)
     {
 
-        // check if the node already exists
+       // Check if the node already exists
 
-        // if already exists, return
-        if( get(userId) != null )
+        if(get(userId) != null)
         {
-            // add this movie and rating to the existing user
             get(userId).insert(movieId, rating);
 
-            // return
+
             return;
         }
 
-        // else append
-
-        // create a new user node
         UserNode newUser = new UserNode(userId);
-        // add movie and rating
         newUser.insert(movieId, rating);
-
-        // append to current list
         append(newUser);
     }
 
@@ -55,25 +47,17 @@ public class UsersList {
      */
     public void append(UserNode newNode)
     {
-        // now, append this new node at the end of the tail
+       if(head == null)
+       {
+           head = newNode;
+           tail = newNode;
 
-        // if head is null
-        if( head == null )
-        {
-            // head is the new node
-            head = newNode;
-
-            // also, tail is the new node
-            tail = newNode;
-        }
-        else
-        {
-            // append to end of tail
-            tail.setNext(newNode);
-
-            // tail is the new node now
-            tail = newNode;
-        }
+       }
+       else
+       {
+           tail.setNext(newNode);
+           tail = newNode;
+       }
     }
 
     /** Return a UserNode given userId
@@ -83,22 +67,15 @@ public class UsersList {
      */
     public UserNode get(int userId)
     {
-        // iterate over all the users and return the user
         UserNode current = head;
-        while( current != null )
+        while(current != null)
         {
-            // check for a match
-            if( current.getId() == userId )
+            if(current.getId() == userId)
             {
-                // return this user
                 return current;
             }
-
-            // move to the next user
             current = current.next();
         }
-
-        // be default return null, for invalid id
         return null;
     } // get method
 
@@ -112,9 +89,33 @@ public class UsersList {
      * @return the node that corresponds to the most similar user
      */
     public UserNode findMostSimilarUser(int userid) {
-        UserNode mostSimilarUser = null;
-        // FILL IN CODE
 
+        int mostSimilarUserID = 0;
+        UserNode current = head;
+        UserNode myUserNode = this.get(userid);
+        double maxSim = -1, similarity;
+        while (current != null)
+        {
+            if (current.getId() == userid)
+            {
+                current = current.next();
+                continue;
+
+            }
+            similarity = current.computeSimilarity(myUserNode);
+
+            if (similarity > maxSim)
+            {
+                maxSim = similarity;
+                mostSimilarUserID = current.getId();
+
+
+            }
+            current = current.next();
+        }
+
+
+        UserNode mostSimilarUser = this.get(mostSimilarUserID);
 
         return mostSimilarUser;
 

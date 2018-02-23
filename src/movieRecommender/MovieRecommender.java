@@ -2,6 +2,8 @@ package movieRecommender;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.HashSet;
+//import java.io.FileNotFoundException;
 
 /** MovieRecommender. A class that is responsible for:
     - Reading movie and ratings data from the file and loading it in the data structure UsersList.
@@ -26,8 +28,7 @@ public class MovieRecommender {
      * @param movieFilename name of the file with movie info
      * @param ratingsFilename name of the file with ratings info
      */
-    public void loadData(String movieFilename, String ratingsFilename) {
-
+    public void loadData(String movieFilename, String ratingsFilename) throws IOException {
         loadMovies(movieFilename);
         loadRatings(ratingsFilename);
     }
@@ -38,8 +39,62 @@ public class MovieRecommender {
      * @param movieFilename csv file that contains movie information.
      *
      */
-    private void loadMovies(String movieFilename) {
-        // FILL IN CODE
+    private void loadMovies(String movieFilename) throws FileNotFoundException, IOException
+    {
+        String line = "";
+        String comma = ",";
+        int ID, firstCommaIndex = 0;
+        String MovieName;
+        char character;
+        boolean isQuoted;
+
+        FileReader reader = new FileReader(movieFilename);
+        BufferedReader reader1 = new BufferedReader(reader);
+
+        line = reader1.readLine();
+        while((line = reader1.readLine()) != null)
+        {
+            firstCommaIndex = line.indexOf(comma);
+            if (firstCommaIndex == 0) continue;
+            ID = Integer.parseInt(line.substring(0, firstCommaIndex));
+
+            character = line.charAt(firstCommaIndex);
+            isQuoted = (character == '"' || character == '\'');
+            if (isQuoted)
+            {
+                int firstQuoteIndex = firstCommaIndex + 1;
+                String newString = line.substring(firstCommaIndex + 1);
+                int secondQuoteIndex = newString.indexOf(character);
+                if(secondQuoteIndex != -1 && firstQuoteIndex >= 0)
+                {
+                    MovieName = newString.substring(0, secondQuoteIndex);
+
+                }
+                else
+                {
+                    continue;
+                }
+
+            }
+            else
+            {
+                String newString = line.substring(firstCommaIndex + 1);
+                int secondCommaIndex = newString.indexOf(comma);
+                if (firstCommaIndex >= 0 && secondCommaIndex < line.length())
+                {
+                    MovieName = newString.substring(0, secondCommaIndex);
+                }
+                else
+                {
+                    continue;
+                }
+
+            }
+
+            movieMap.put(ID, MovieName);
+        }
+
+        //System.out.println(movieMap);
 
     }
 
@@ -47,9 +102,26 @@ public class MovieRecommender {
      * Load users' movie ratings from the file into UsersList
      * @param ratingsFilename name of the file that contains ratings
      */
-    private void loadRatings(String ratingsFilename) {
-        // FILL IN CODE
+    private void loadRatings(String ratingsFilename) throws FileNotFoundException, IOException {
+        String line;
+        String comma = ",";
+        int movieId, userId;
+        double rating;
+        String[] data;
 
+        FileReader reader1 = new FileReader(ratingsFilename);
+        BufferedReader reader2 = new BufferedReader(reader1);
+
+        line = reader2.readLine();
+        while ((line = reader2.readLine()) != null) {
+            //We will read the userid, movie id , and rating
+            data = line.split(comma);
+            userId = Integer.parseInt(data[0]);
+            movieId = Integer.parseInt(data[1]);
+            rating = Double.valueOf(data[2]);
+            usersData.insert(userId, movieId, rating);
+
+        }
     }
 
     /**
@@ -63,16 +135,36 @@ public class MovieRecommender {
      * @param filename name of the file where to output recommended movie titles
      *                 Format of the file: one movie title per each line
      */
-    public void findRecommendations(int userid, int num, String filename) {
+        public void findRecommendations(int userid, int num, String filename) {
 
-        // compute similarity between userid and all the other users
-        // find the most similar user and recommend movies that the most similar
-        // user rated as 5.
-        // Recommend only the movies that userid has not seen (has not
-        // rated).
-        // FILL IN CODE
+            PrintWriter pw = null;
 
-    }
+            try
+            {
+                pw = new PrintWriter(new File(filename));
+
+            }
+            catch(FileNotFoundException e)
+            {
+                System.out.println("File " + filename + "not found");
+                return;
+            }
+
+            UserNode myUserNode = usersData.get(userid);
+            UserNode mostSimilarUser = usersData.findMostSimilarUser(userid);
+            int[] MSUFavorites  = mostSimilarUser.getFavoriteMovies(num);
+
+            HashSet<Integer> alreadyWatched = myUserNode.alreadyWatched();
+
+            for (int movieId : MSUFavorites){
+                if (movieId == 0) continue; // 0 is invalid movieId number
+                if (!(alreadyWatched.contains(movieId))){
+                    pw.print(movieId + " : " + movieMap.get(movieId) + "\n");
+                }
+            }
+            pw.close();
+
+        }
 
     /**
      * Computes up to num movie anti-recommendations for the user with the given
@@ -88,12 +180,33 @@ public class MovieRecommender {
      */
     public void findAntiRecommendations(int userid, int num, String filename) {
 
-        // compute similarity between userid and all the other users
-        // find the most similar user and anti-recommend movies that the most similar
-        // user rated as 1.
-        // Anti-recommend only the movies that userid has not seen (has not
-        // rated).
-        // FILL IN CODE
+        PrintWriter pw = null;
+
+        try
+        {
+            pw = new PrintWriter(new File(filename));
+
+        }
+        catch(FileNotFoundException e)
+        {
+            System.out.println("File " + filename + "not found");
+            return;
+        }
+
+        UserNode myUserNode = usersData.get(userid);
+        UserNode mostSimilarUser = usersData.findMostSimilarUser(userid);
+        int[] MSUAntiFavorites  = mostSimilarUser.getLeastFavoriteMovies(num);
+
+        HashSet<Integer> alreadyWatched = myUserNode.alreadyWatched();
+
+        for (int movieId : MSUAntiFavorites){
+            if (movieId == 0) continue; // 0 is invalid movieId number
+            if (!(alreadyWatched.contains(movieId))){
+                pw.write(movieId + " : " + movieMap.get(movieId) + "\n");
+            }
+        }
+        pw.close();
+
     }
 
 }

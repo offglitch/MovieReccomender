@@ -14,7 +14,8 @@ public class MovieRatingNode {
      * @param movieId id of the movie
      * @param rating  rating of the movie
      */
-    public MovieRatingNode(int movieId, double rating) {
+    public MovieRatingNode(int movieId, double rating)
+    {
         this.movieId = movieId;
         next = null;
 
