@@ -1,16 +1,5 @@
 package movieRecommender;
 
-/**
- * MovieRatingsList.
- * A class that stores movie ratings for a user in a custom singly linked list of
- * MovieRatingNode objects. Has various methods to manipulate the list. Stores
- * only the head of the list (no tail! no size!). The list should be sorted by
- * rating (from highest to smallest).
- * Fill in code in the methods of this class.
- * Do not modify signatures of methods. Not all methods are needed to compute recommendations,
- * but all methods are required for the assignment.
- */
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -31,7 +20,7 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 	 */
 	public void setRating(int movieId, double newRating)
 	{
-		// Check if the movieId exists
+		// Check if the ID exists
 
 		if(getRating(movieId) != -1)
 		{
@@ -69,12 +58,12 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 	}
 
 
-    /**
-     * Return the rating for a given movie. If the movie is not in the list,
-     * returns -1.
-     * @param movieId movie id
-     * @return rating of a movie with this movie id
-     */
+	/**
+	 * Return the rating for a given movie. If the movie is not in the list,
+	 * returns -1.
+	 * @param movieId movie id
+	 * @return rating of a movie with this movie id
+	 */
 	public double getRating(int movieId)
 	{
 		// The ref to the head of this list
@@ -100,175 +89,178 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 	}
 
 
-    /**
-     * Insert a new node (with a given movie id and a given rating) into the list.
-     * Insert it in the right place based on the value of the rating. Assume
-     * the list is sorted by the value of ratings, from highest to smallest. The
-     * list should remain sorted after this insert operation.
-     *
-     * @param movieId id of the movie
-     * @param rating rating of the movie
-     */
+	/**
+	 * Insert a new node (with a given movie id and a given rating) into the list.
+	 * Insert it in the right place based on the value of the rating. Assume
+	 * the list is sorted by the value of ratings, from highest to smallest. The
+	 * list should remain sorted after this insert operation.
+	 *
+	 * @param movieId id of the movie
+	 * @param rating rating of the movie
+	 */
 	public void insertByRating(int movieId, double rating)
-    {
-        // if the head is null create a new head
-        if(head == null)
-        {
-            head = new MovieRatingNode(movieId, rating);
+	{
+		// if the head is null, create a new head
+		if( head == null )
+		{
+			// create a new head
+			head = new MovieRatingNode(movieId, rating);
 
-            return;
-        }
+			// return
+			return;
+		}
 
-        // If this rating is greater than the rating at the head
-        // insert it before the head
+		// if this rating is greater than the rating at head, we insert it before head
+		else if( rating > head.getMovieRating() )
+		{
+			// create new node
+			MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
 
-        else if(rating > head.getMovieRating())
-        {
-            // Create new node
-            MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
+			// add it before the head
+			newNode.setNext(head);
 
-            // Add it before the head
-            newNode.setNext(head);
+			// now, head is made to point to this new node, so that this becomes new head
+			head = newNode;
+		}
+		// else insert it at the right position
+		else
+		{
+			// we use current and previous pointers
+			// current points to current node, and current node starts from the second node in the list
+			// previous points to the node before the current node
+			MovieRatingNode current = head.next();
+			MovieRatingNode prev = head;
 
-            // Head is made point to the new node
-            head = newNode;
+			// we iterate this as long as the rating of this movie is smaller than rating of current movie
+			while( current != null )
+			{
+				// if node found where the rating of this movie is greater, insert
+				if( movieId>current.getMovieId() )
+				{
+					// create a new movie node
+					MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
 
-        }
+					// this new node is inserted between prev and current
+					// so previously, : ..-> prev->current->...
+					// after inserting this, it will be : ...prev->newnode->current->...
 
-        // Else, insert it at the right position
-        else
-            {
-            // current points to current node, prev to node before current
-            MovieRatingNode current = head.next();
-            MovieRatingNode prev = head;
+					// set the next of the new node is current
+					newNode.setNext(current);
 
-            // We iterate this so long the rating is smaller than the rating of current
+					// now, next of prev is new node
+					prev.setNext(newNode);
 
-            while(current != null) {
-                if(movieId > current.getMovieId())
-                {
-                    MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
+					// return
+					return;
+				}
 
-                    // After inserting: prev | newNode | current
+				// move to the next movie
+				prev = current;
+				current = current.next();
+			}
 
-                    newNode.setNext(current);
+			// if reached here, means this move rating was smaller than all the ratings in the list
+			// so we add this new rating to end of this list
+			MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
 
-                    prev.setNext(newNode);
+			// since prev now is pointing to the last of the node in the list, we make next of prev point to this node
+			prev.setNext(newNode);
+		}
+	}
 
-                    return;
 
-                }
-
-                // Moving
-
-                prev = current;
-                current = current.next();
-
-            }
-
-            // Movie rating is smaller than all ratings
-            // Add to end of the list
-
-            MovieRatingNode newNode = new MovieRatingNode(movieId, rating);
-
-            prev.setNext(newNode);
-        }
-    }
-
-    /**
-     * Computes similarity between two lists of ratings using Pearson correlation.
+	/**
+	 * Computes similarity between two lists of ratings using Pearson correlation.
 	 * https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
 	 * Note: You are allowed to use a HashMap for this method.
-     *
-     * @param otherList another MovieRatingList
-     * @return similarity computed using Pearson correlation
-     */
-    public double computeSimilarity(MovieRatingsList otherList) {
-        double similarity = 0;
+	 *
+	 * @param otherList another MovieRatingList
+	 * @return similarity computed using Pearson correlation
+	 */
+	public double computeSimilarity(MovieRatingsList otherList)
+	{
+		double similarity = 0;
+		// a hash map to store the otherList ratings
+		HashMap<Integer, Double> ratingsMapOther = new HashMap<>();
+		// put all the ratings from the other list into the hashmap
+		for(MovieRatingNode node : otherList){
+			ratingsMapOther.put(node.getMovieId(), node.getMovieRating());
+		}
+		HashMap<Integer, Double> ratingsMapThis = new HashMap<>();
 
-        // A hashmap to store the otherList ratings
+		for(MovieRatingNode node : this){
+			if (ratingsMapOther.containsKey(node.getMovieId()))
+				ratingsMapThis.put(node.getMovieId(), node.getMovieRating());
+		}
 
-        HashMap<Integer, Double> ratingsMapOther = new HashMap<>();
+		for (Iterator<Integer> it = ratingsMapOther.keySet().iterator(); it.hasNext();) {
+			Integer key = it.next();
 
-        // All ratings from other list into this HashMap
+			if(!ratingsMapThis.containsKey(key)){
+				it.remove(); //removes the node which is being iterated currently.
+			}
+		}
+		for (Iterator<Integer> it = ratingsMapThis.keySet().iterator(); it.hasNext();) {
+			Integer key = it.next();
+			//If the key isn't present in both the lists
+			//Then remove this key from the hashmap1
+			if(!ratingsMapOther.containsKey(key)){
+				it.remove();
+			}
+		}
 
-        for (MovieRatingNode node : otherList) {
-            ratingsMapOther.put(node.getMovieId(), node.getMovieRating());
-        }
+		int n = ratingsMapOther.size();
 
-        //HashMap storing this movie list's ratings
+		double sx = 0;
 
-        HashMap<Integer, Double> ratingsMap = new HashMap<>();
+		double sy = 0;
 
-        // All ratings into the HashMap
-        for (MovieRatingNode node : this) {
-            if (ratingsMapOther.containsKey(node.getMovieId()))
-                ratingsMap.put(node.getMovieId(), node.getMovieRating());
-        }
+		double sxy = 0;
 
-        for (Iterator<Integer> locate = ratingsMapOther.keySet().iterator(); locate.hasNext(); ) {
-            Integer key = locate.next();
-            // If the key (Movie) isn't present in list
-            // Remove key from first HashMap
-            if (!ratingsMap.containsKey(key)) ;
-            {
-                locate.remove();
-            }
-        }
+		double sx2 = 0;
 
-        // Now both HashMaps have equal number of keys
-        // Just the common movies
-
-        int n = ratingsMapOther.size();
-        double sx = 0;
-        double sy = 0;
-        double sxy = 0;
-        double sx2 = 0;
-        double sy2 = 0;
-
-        // No common movies -> similarity is -1
-
-        for(Integer key: ratingsMapOther.keySet())
-        {
-            sx += ratingsMapOther.get(key);
-            sy += ratingsMap.get(key);
-            sxy += ratingsMapOther.get(key)*ratingsMap.get(key);
-            sx2 += ratingsMapOther.get(key)*ratingsMapOther.get(key);
-            sy2 += ratingsMap.get(key)*ratingsMap.get(key);
-        }
+		double sy2 = 0;
 
 
-        double numerator = n * sxy - sx * sy;
-        double denominator = Math.sqrt(n*sx2-sx*sx)*Math.sqrt(n*sy2-sy*sy);
-        similarity = numerator/denominator;
-        if (denominator == 0) return 0; // if denominator is 0, then return 0
-        return similarity;
 
+		for(Integer key: ratingsMapOther.keySet()){
+			sx += ratingsMapOther.get(key);
+			sy += ratingsMapThis.get(key);
+			sxy += ratingsMapOther.get(key)*ratingsMapThis.get(key);
+			sx2 += ratingsMapOther.get(key)*ratingsMapOther.get(key);
+			sy2 += ratingsMapThis.get(key)*ratingsMapThis.get(key);
+		}
+		double numerator = n*sxy - sx*sy;
+		double denominator = Math.sqrt(n*sx2-sx*sx)*Math.sqrt(n*sy2-sy*sy);
+
+		similarity = numerator/denominator;
+		if (denominator==0) return 0; // if denominator is 0, then return 0
+		return similarity;
 	}
-    /**
-     * Returns a sublist of this list where the rating values are in the range
-     * from begRating to endRating, inclusive.
-     *
-     * @param begRating lower bound for ratings in the resulting list
-     * @param endRating upper bound for ratings in the resulting list
-     * @return sublist of the MovieRatingsList that contains only nodes with
-     * rating in the given interval
-     */
+	/**
+	 * Returns a sublist of this list where the rating values are in the range
+	 * from begRating to endRating, inclusive.
+	 *
+	 * @param begRating lower bound for ratings in the resulting list
+	 * @param endRating upper bound for ratings in the resulting list
+	 * @return sublist of the MovieRatingsList that contains only nodes with
+	 * rating in the given interval
+	 */
 	public MovieRatingsList sublist(int begRating, int endRating)
-    {
-        MovieRatingsList res = new MovieRatingsList();
-        MovieRatingNode current = head;
-        while(current != null)
-        {
-            if(current.getMovieRating() >= begRating && current.getMovieRating() <= endRating)
-            {
-                res.insertByRating( current.getMovieId(), current.getMovieRating() );
-            }
-            current = current.next();
-        }
-        return res;
-    }
+	{
 
+		MovieRatingsList res = new MovieRatingsList();
+		MovieRatingNode current = head;
+		while(current != null)
+		{
+			if(current.getMovieRating() >= begRating && current.getMovieRating() <= endRating)
+			{
+				res.insertByRating( current.getMovieId(), current.getMovieRating() );
+			}
+			current = current.next();
+		}
+		return res;
+	}
 
 	/** Traverses the list and prints the ratings list in the following format:
 	 *  movieId:rating; movieId:rating; movieId:rating;  */
@@ -280,12 +272,15 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 		// Add all ratings to be printed
 		// Traverse as long as current is not null
 		while(current != null)
-        {
+		{
+			// Print this node
 			System.out.print(current.getMovieId() + ":" + current.getMovieRating() + "; ");
 
 			// Move to the next
 			current = current.next();
 		}
+
+		// \n
 		System.out.println();
 
 	}
@@ -293,7 +288,7 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 	/**
 	 * Returns the middle node in the list - the one half way into the list.
 	 * Needs to have the running time O(n), and should be done in one pass
-     * using slow & fast pointers (as described in class).
+	 * using slow & fast pointers (as described in class).
 	 *
 	 * @return the middle MovieRatingNode
 	 * The idea is that the middle node will move once for every two moves of the fast node
@@ -301,7 +296,10 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 	 */
 	public MovieRatingNode getMiddleNode()
 	{
+		// Slow node
 		MovieRatingNode middleNode = head;
+
+		// fast node
 		MovieRatingNode fastNode = head;
 
 		// For every two moves of the fastNode, move the middleNode once
@@ -330,35 +328,33 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 
 		return middleNode;
 	}
-    /**
-     * Returns the median rating (the number that is halfway into the sorted
-     * list). To compute it, find the middle node and return it's rating. If the
-     * middle node is null, return -1.
-     *
-     * @return rating stored in the node in the middle of the list
-     */
+	/**
+	 * Returns the median rating (the number that is halfway into the sorted
+	 * list). To compute it, find the middle node and return it's rating. If the
+	 * middle node is null, return -1.
+	 *
+	 * @return rating stored in the node in the middle of the list
+	 */
 	public double getMedianRating()
 	{
-        // If the middle node is not null, return its value
-        if( getMiddleNode() != null )
-        {
-            return getMiddleNode().getMovieRating();
-        }
+		// If the middle node is not null, return its value
+		if( getMiddleNode() != null )
+		{
+			return getMiddleNode().getMovieRating();
+		}
 
-        // If middle node is null return -1
-
-        return -1;
-
+		// if middle node is null, return -1
+		return -1;
 	}
 
-    /**
-     * Returns a RatingsList that contains n best rated movies. These are
-     * essentially first n movies from the beginning of the list. If the list is
-     * shorter than size n, it will return the whole list.
-     *
-     * @param n the maximum number of movies to return
-     * @return MovieRatingsList containing movies rated as 5
-     */
+	/**
+	 * Returns a RatingsList that contains n best rated movies. These are
+	 * essentially first n movies from the beginning of the list. If the list is
+	 * shorter than size n, it will return the whole list.
+	 *
+	 * @param n the maximum number of movies to return
+	 * @return MovieRatingsList containing movies rated as 5
+	 */
 	public MovieRatingsList getNBestRankedMovies(int n)
 	{
 		// The new list to be returned
@@ -388,16 +384,16 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 		return res;
 	}
 
-    /**
-     * * Returns a RatingsList that contains n worst rated movies for this user.
-     * Essentially, these are the last n movies from the end of the list. You are required to
+	/**
+	 * * Returns a RatingsList that contains n worst rated movies for this user.
+	 * Essentially, these are the last n movies from the end of the list. You are required to
 	 * use slow & fast pointers to find the n-th node from the end (as discussed in class).
 	 * Note: This method should compute the result in one pass. Do not use size variable
 	 * Do NOT use reverse(). Do not destroy the list.
-     *
-     * @param n the maximum number of movies to return
-     * @return MovieRatingsList containing movies rated as 1
-     */
+	 *
+	 * @param n the maximum number of movies to return
+	 * @return MovieRatingsList containing movies rated as 1
+	 */
 	public MovieRatingsList getNWorstRankedMovies(int n)
 	{
 		// list to store the result
@@ -416,8 +412,8 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 			// doesn't have n elements. So return null
 			else{
 				return null;
-				}
 			}
+		}
 		// now, the slow node and the fast node are 'n' nodes apart
 		// move the fast node and the slow node together until you reach the end of the list
 		while(fastNode != null){
@@ -431,21 +427,20 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 			result.insertByRating(slowNode.getMovieId(), slowNode.getMovieRating());
 			slowNode = slowNode.next();
 		}
-		return result;
-
+		return result; // don't forget to change6
 	}
 
 
 	/**
-     * Return a new list that is the reverse of the original list. The returned
-     * list is sorted from lowest ranked movies to the highest rated movies.
-     * Use only one additional MovieRatingsList (the one you return) and constant amount
-     * of memory. You may NOT use arrays, ArrayList and other built-in Java Collections classes.
-     * Read description carefully for requirements regarding implementation of this method.
+	 * Return a new list that is the reverse of the original list. The returned
+	 * list is sorted from lowest ranked movies to the highest rated movies.
+	 * Use only one additional MovieRatingsList (the one you return) and constant amount
+	 * of memory. You may NOT use arrays, ArrayList and other built-in Java Collections classes.
+	 * Read description carefully for requirements regarding implementation of this method.
 	 *
-     * @param h head of the MovieRatingList to reverse
-     * @return reversed list
-     */
+	 * @param h head of the MovieRatingList to reverse
+	 * @return reversed list
+	 */
 	public MovieRatingsList reverse(MovieRatingNode h)
 	{
 		MovieRatingsList r = new MovieRatingsList();
@@ -476,6 +471,7 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 		return r;
 	}
 
+	@Override
 	public Iterator<MovieRatingNode> iterator()
 	{
 
@@ -490,9 +486,9 @@ public class MovieRatingsList implements Iterable<MovieRatingNode> {
 	 */
 	private class MovieRatingsListIterator implements Iterator<MovieRatingNode> {
 
-			MovieRatingNode curr = null;
+		MovieRatingNode curr = head;
 
-			//***********double check please***********
+
 
 		public MovieRatingsListIterator(int index)
 		{
